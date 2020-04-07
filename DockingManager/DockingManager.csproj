@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DockContentCollection.cs" />
     <Compile Include="DockPanelManager.cs" />
     <Compile Include="IDockPanel.cs" />
     <Compile Include="MultiDockContent.cs">

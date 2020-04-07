@@ -13,11 +13,21 @@ namespace DockingManager.Tests
         }
     }
 
-    class TestForm : DockContent
+    class TestForm1 : DockContent
     {
         public string PersistString { get; }
 
-        public TestForm()
+        public TestForm1()
+        {
+            PersistString = GetPersistString();
+        }
+    }
+
+    class TestForm2 : DockContent
+    {
+        public string PersistString { get; }
+
+        public TestForm2()
         {
             PersistString = GetPersistString();
         }

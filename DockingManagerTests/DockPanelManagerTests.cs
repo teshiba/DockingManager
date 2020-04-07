@@ -3,14 +3,15 @@ using System;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Reflection;
 using System.IO;
+using System.Collections.ObjectModel;
 
 namespace DockingManager.Tests
 {
-    [TestClass()]
+    [TestClass]
     public class DockPanelManagerTests
     {
 
-        [TestMethod()]
+        [TestMethod]
         public void DockPanelManagerTest()
         {
             // Arrange
@@ -27,7 +28,7 @@ namespace DockingManager.Tests
             Assert.AreEqual(expectedValue, actualValue);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void DockPanelManagerTestExceptionNull()
         {
             Assert.ThrowsException<ArgumentNullException>(() =>
@@ -36,7 +37,7 @@ namespace DockingManager.Tests
             });
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ShowTest()
         {
             // Arrange
@@ -53,7 +54,7 @@ namespace DockingManager.Tests
             Assert.AreEqual(expectedValue, actualValue);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ShowTestNull()
         {
             var testClass = new DockPanelManager(new TestMDIForm());
@@ -63,7 +64,7 @@ namespace DockingManager.Tests
             });
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void SaveWindowStateTest()
         {
             // Arrange
@@ -81,13 +82,13 @@ namespace DockingManager.Tests
             Assert.IsTrue(actualValue);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void RestorWindowStateTest()
         {
             // Arrange
             using (var mdiFormBefore = new TestMDIForm()) {
                 var formBefore1 = new TestMultiForm("formId-1");
-                var formBefore2 = new TestForm();
+                var formBefore2 = new TestForm1();
                 var testClassBefore = new DockPanelManager(mdiFormBefore);
                 testClassBefore.Show(formBefore1);
                 testClassBefore.Show(formBefore2);
@@ -110,7 +111,44 @@ namespace DockingManager.Tests
             Assert.AreEqual(expectedValue, actualValue);
         }
 
-        [TestMethod()]
+        [TestMethod]
+        public void RestorWindowStateTestWithArgs()
+        {
+            // Arrange
+            using (var mdiFormBefore = new TestMDIForm()) {
+                var testClassBefore = new DockPanelManager(mdiFormBefore);
+                testClassBefore.Show(new TestMultiForm("formId-1"));
+                testClassBefore.Show(new TestMultiForm("formId-2"));
+                testClassBefore.Show(new TestMultiForm("formId-3"));
+                testClassBefore.Show(new TestForm1());
+                testClassBefore.Show(new TestForm2());
+                testClassBefore.SaveWindowState();
+            }
+
+            var mdiForm = new TestMDIForm();
+            var testClass = new DockPanelManager(mdiForm);
+
+            SetEntryAssembly();
+
+            // Act
+            var multiDockContents = new Collection<MultiDockContent>();
+            var form1 = new TestForm1();
+            var form2 = new TestForm2();
+            testClass.RestorWindowState(multiDockContents, form1, form2);
+
+            // Assert
+            Assert.AreEqual(DockState.Document, form1.VisibleState);
+            Assert.AreEqual(DockState.Document, form2.VisibleState);
+            Assert.AreEqual(multiDockContents[0].FormId, "formId-1");
+            Assert.AreEqual(multiDockContents[1].FormId, "formId-2");
+            Assert.AreEqual(multiDockContents[2].FormId, "formId-3");
+            Assert.AreEqual(multiDockContents[0].GetType(), typeof(TestMultiForm));
+            Assert.AreEqual(multiDockContents[1].GetType(), typeof(TestMultiForm));
+            Assert.AreEqual(multiDockContents[2].GetType(), typeof(TestMultiForm));
+        }
+
+
+        [TestMethod]
         public void RestorWindowStateTestNoFile()
         {
             // Arrange

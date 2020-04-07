@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -54,8 +56,43 @@ namespace DockingManager
         /// </summary>
         public void RestorWindowState()
         {
+            RestorWindowState(null);
+        }
+
+        /// <summary>
+        /// Restores window state from setting file.
+        /// </summary>
+        /// <param name="multiDockContents">Collection of storing the restored MultiDockContent.</param>
+        /// <param name="dockContents">Array of DockContent to be restored.</param>
+        public void RestorWindowState(Collection<MultiDockContent> multiDockContents, params DockContent[] dockContents)
+        {
+            var contents = new Dictionary<Type, DockContent>();
+
+            foreach (var item in dockContents) {
+                contents.Add(item.GetType(), item);
+            }
+
             if (File.Exists(XmlName)) {
-                dockPanel.LoadFromXml(XmlName, DeserializeContent);
+                dockPanel.LoadFromXml(
+                    XmlName,
+                    persistString =>
+                    {
+                        ParsePersistString(persistString, out var contentsType, out var formId);
+
+                        var type = Assembly.GetEntryAssembly().GetType(contentsType);
+
+                        if (!contents.TryGetValue(type, out var dockContent)) {
+                            if (string.IsNullOrEmpty(formId)) {
+                                dockContent = (DockContent)Activator.CreateInstance(type);
+                            } else {
+                                var multiDockContent = (MultiDockContent)Activator.CreateInstance(type, formId);
+                                multiDockContents?.Add(multiDockContent);
+                                dockContent = multiDockContent;
+                            }
+                        }
+
+                        return dockContent;
+                    });
             }
         }
 
@@ -75,22 +112,6 @@ namespace DockingManager
             if (item.Length == 2) {
                 fileName = item[1];
             }
-        }
-
-        private IDockContent DeserializeContent(string persistString)
-        {
-            ParsePersistString(persistString, out var contentsType, out var formId);
-
-            var type = Assembly.GetEntryAssembly().GetType(contentsType);
-
-            DockContent dockContent;
-            if (string.IsNullOrEmpty(formId)) {
-                dockContent = (DockContent)Activator.CreateInstance(type);
-            } else {
-                dockContent = (MultiDockContent)Activator.CreateInstance(type, formId);
-            }
-
-            return dockContent;
         }
     }
 }
