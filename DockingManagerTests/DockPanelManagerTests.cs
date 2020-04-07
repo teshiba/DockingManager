@@ -131,10 +131,9 @@ namespace DockingManager.Tests
             SetEntryAssembly();
 
             // Act
-            var multiDockContents = new Collection<MultiDockContent>();
             var form1 = new TestForm1();
             var form2 = new TestForm2();
-            testClass.RestorWindowState(multiDockContents, form1, form2);
+            var multiDockContents = testClass.RestorWindowState(form1, form2);
 
             // Assert
             Assert.AreEqual(DockState.Document, form1.VisibleState);

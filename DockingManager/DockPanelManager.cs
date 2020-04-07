@@ -56,16 +56,17 @@ namespace DockingManager
         /// </summary>
         public void RestorWindowState()
         {
-            RestorWindowState(null);
+            RestorWindowState(Array.Empty<DockContent>());
         }
 
         /// <summary>
         /// Restores window state from setting file.
         /// </summary>
-        /// <param name="multiDockContents">Collection of storing the restored MultiDockContent.</param>
         /// <param name="dockContents">Array of DockContent to be restored.</param>
-        public void RestorWindowState(Collection<MultiDockContent> multiDockContents, params DockContent[] dockContents)
+        /// <returns>Collection of restored MultiDockContent.</returns>
+        public Collection<MultiDockContent> RestorWindowState(params DockContent[] dockContents)
         {
+            var multiDockContents = new Collection<MultiDockContent>();
             var contents = new Dictionary<Type, DockContent>();
 
             foreach (var item in dockContents) {
@@ -94,6 +95,8 @@ namespace DockingManager
                         return dockContent;
                     });
             }
+
+            return multiDockContents;
         }
 
         /// <summary>
